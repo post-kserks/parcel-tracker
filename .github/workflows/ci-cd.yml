@@ -19,22 +19,36 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: '1.22'
+        go-version: '1.25'
+
+    - name: Install SQLite3 (for database setup)
+      run: sudo apt-get update && sudo apt-get install -y sqlite3
+
+    - name: Create and initialize database
+      run: |
+        # Создаем базу данных и таблицу
+        sqlite3 tracker.db "
+        CREATE TABLE parcel (
+            number INTEGER PRIMARY KEY AUTOINCREMENT,
+            client INTEGER NOT NULL,
+            status TEXT NOT NULL,
+            address TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        );
+        "
+        # Проверяем, что таблица создалась
+        sqlite3 tracker.db ".tables"
 
     - name: Run Go Vet
       run: go vet ./...
 
     - name: Run Tests
       run: go test -v -timeout 30s ./...
-      # Таймаут помогает "убить" зависшие тесты
 
   # Job 2: Сборка и публикация в Docker Hub
   build-and-push:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
-    # Этот job запустится только если:
-    # 1. Прошел предыдущий job "test"
-    # 2. Событие - это push в main ветку с тегом (например, v1.0.0)
     needs: test
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
 
