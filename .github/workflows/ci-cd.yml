@@ -68,5 +68,5 @@ jobs:
           context: .
           push: true
           tags: |
-            postkserks/parcel-tracker:${{ github.ref_name }}  # Будет postkserks/parcel-tracker:v1.0.0
+            postkserks/parcel-tracker:${{ github.ref_name }}  
             postkserks/parcel-tracker:latest
